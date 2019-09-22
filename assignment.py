@@ -5,6 +5,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import stats
 
 
 def clean_degrees(df):
@@ -17,7 +18,7 @@ def clean_degrees(df):
 
 def clean_religion(df):
     df = (df
-          .rename(columns={'Bundesland': 'Country', 'Einwohner': 'Population', 'Katholisch': 'Catholic', 'Evangelisch': 'Evangelic'})
+          .rename(columns={'Bundesland': 'Country', 'Einwohner': 'Population', 'Katholisch': 'Catholic', 'Evangelisch': 'Protestant'})
           .set_index(['Country'])
           )
     return df
@@ -27,26 +28,34 @@ def merge_data(df1, df2):
     return pd.merge(df1, df2, how='inner', left_index=True, right_index=True)
 
 
-def plot_data():
-    plt.bar(df['Population'].index, df['Population'])
-    plt.bar(df['Population'].index, df['Catholic'])
-    plt.bar(df['Population'].index, df['Evangelic'], bottom=df['Catholic'])
+def plot_catholic(ax):
+    ax.bar(df['Population'].index, df['Catholic']/df['Population'] * 100)
+    create_labels(ax)
+    plot_degree(ax)
+    ax.set_title('Catholics in german countries')
 
+def plot_protestant(ax):
+    ax.bar(df['Population'].index, df['Protestant']/df['Population'] * 100)
+    create_labels(ax)
+    plot_degree(ax)
+    ax.set_title('Protestants in german countries')
+    plt.legend(( 'Protestant'))
 
-def plot_degree():
-    ax = plt.gca()
+def plot_degree(ax):
     ax_degree = ax.twinx() 
-    ax_degree.set_ylabel('Average degree', color='yellow')
+    ax_degree.set_ylabel('Ø degree of graduates', color='yellow')
     ax_degree.plot(df['Degree'], color='yellow')
 
-def create_labels():
-    ax = plt.gca()
-    ax.set_title('German countries: Relation of religion to their population')
+def create_labels(ax):
     ax.set_xlabel('Country')
-    ax.set_ylabel('Population in millions')
-    plt.legend(('Other', 'Catholic', 'Evangelic'))
+    ax.set_ylabel('Pop. in %')
     plt.xticks(rotation='vertical')
 
+def plot_data():
+    f, (ax1, ax2) = plt.subplots(2, 1, sharey=True, sharex=True)
+    plt.subplots_adjust(hspace=0.5)
+    plot_catholic(ax1)
+    plot_protestant(ax2)
 
 religion_per_country = pd.read_excel('ReligionperCountry.xlsx', skiprows=1)
 degrees_per_country = pd.read_excel(
@@ -57,10 +66,22 @@ religion_per_country = clean_religion(religion_per_country)
 df = merge_data(degrees_per_country, religion_per_country)
 
 plot_data()
-create_labels()
-plot_degree()
 
-df
 
+ttest_protestant_degree = stats.ttest_ind( df['Protestant'],  df['Degree'])
+ttest_catholic_degree = stats.ttest_ind( df['Catholic'],  df['Degree'])
+
+if ttest_protestant_degree.pvalue < 0.01:
+    protestent_significant = True
+else:
+    protestent_significant = False
+print('Significant (p < 0.01) correlation between percentage of protestant population per country and the average high school graduates degree?')
+print(protestent_significant)
+if ttest_catholic_degree.pvalue < 0.01:
+    catholic_significant = True
+else:
+    catholic_significant = False
+print('Significant (p < 0.01) correlation between percentage of catholic population per country and the average high school graduates degree?')
+print(catholic_significant)
 
 # %%
