@@ -32,6 +32,7 @@ def plot_data():
     plt.bar(df['Population'].index, df['Catholic'])
     plt.bar(df['Population'].index, df['Evangelic'], bottom=df['Catholic'])
 
+
 def plot_degree():
     ax = plt.gca()
     ax_degree = ax.twinx() 
@@ -55,9 +56,9 @@ degrees_per_country = clean_degrees(degrees_per_country)
 religion_per_country = clean_religion(religion_per_country)
 df = merge_data(degrees_per_country, religion_per_country)
 
-
 plot_data()
 create_labels()
+plot_degree()
 
 df
 
