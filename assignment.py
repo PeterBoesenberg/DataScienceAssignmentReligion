@@ -31,7 +31,12 @@ def plot_data():
     plt.bar(df['Population'].index, df['Population'])
     plt.bar(df['Population'].index, df['Catholic'])
     plt.bar(df['Population'].index, df['Evangelic'], bottom=df['Catholic'])
-    plt.plot(df['Degree'])
+
+def plot_degree():
+    ax = plt.gca()
+    ax_degree = ax.twinx() 
+    ax_degree.set_ylabel('Average degree', color='yellow')
+    ax_degree.plot(df['Degree'], color='yellow')
 
 def create_labels():
     ax = plt.gca()
@@ -40,9 +45,7 @@ def create_labels():
     ax.set_ylabel('Population in millions')
     plt.legend(('Other', 'Catholic', 'Evangelic'))
     plt.xticks(rotation='vertical')
-    ax_degree = ax.twinx() 
-    ax_degree.set_ylabel('Average degree', color='yellow')
-    ax_degree.plot(df['Degree'], color='yellow')
+
 
 religion_per_country = pd.read_excel('ReligionperCountry.xlsx', skiprows=1)
 degrees_per_country = pd.read_excel(
